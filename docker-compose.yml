@@ -26,6 +26,7 @@ services:
       - ./src:/app/src
       - ./data:/data
       - ./out:/app/out
+      - ./sql:/app/sql
     working_dir: /app
 
 volumes:
