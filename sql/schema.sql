@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS Produto CASCADE;
 
 -- Produto
 CREATE TABLE Produto (
-    id INT,
+    id SERIAL,
     ASIN VARCHAR(20) PRIMARY KEY,
     Title TEXT NOT NULL,
     Group_name VARCHAR(50) NOT NULL,
@@ -26,13 +26,13 @@ CREATE TABLE Produto (
 
 -- Categoria (hierarquia de categorias da Amazon)
 CREATE TABLE Categoria (
-    Categoria_id SERIAL PRIMARY KEY,
+    Categoria_id INT PRIMARY KEY,
     Nome TEXT NOT NULL,
     Pai_id INT REFERENCES Categoria(Categoria_id) ON DELETE CASCADE
 );
 
 -- Relação produto ↔ categoria (N:N)
-CREATE TABLE Produto_categoria (
+CREATE TABLE Produto_categoria (    
     ASIN VARCHAR(20) REFERENCES Produto(ASIN) ON DELETE CASCADE,
     Categoria_id INT REFERENCES Categoria(Categoria_id) ON DELETE CASCADE,
     PRIMARY KEY (ASIN, Categoria_id)
@@ -48,7 +48,7 @@ CREATE TABLE Produto_similaridade (
 
 -- Avaliações (reviews)
 CREATE TABLE Review (
-    Review_id SERIAL,
+    Review_id SERIAL PRIMARY KEY,
     ASIN VARCHAR(20) REFERENCES Produto(ASIN) ON DELETE CASCADE,
     Customer_id VARCHAR(20),
     Review_date DATE NOT NULL,
