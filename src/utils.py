@@ -21,7 +21,6 @@ def parse_products(filepath):
     Lê o arquivo SNAP e gera um dicionário por produto.
     Cada produto contém: asin, title, group, salesrank, similares, categorias, reviews
     """
-    products = []
     product = None
 
     with open(filepath, "r", encoding="latin1") as f:
@@ -31,7 +30,7 @@ def parse_products(filepath):
             # Novo produto começa quando encontra "Id:"
             if line.startswith("Id:"):
                 if product:
-                    products.append(product)
+                    yield product
                 product = {
                     "id": line.split()[1],
                     "asin": None,
@@ -77,6 +76,5 @@ def parse_products(filepath):
 
         # adiciona o último produto
         if product:
-            products.append(product)
+            yield product
 
-    return products
