@@ -50,5 +50,7 @@ def insert_similares(conn, asin, similares:list):
             for similar in similares:
                 cur.execute("""
                             INSERT INTO Produto_similaridade(ASIN_c, ASIN_s)
-                            VALUES (%s, %s)
-                            """, (asin, similar))    
+                            SELECT %s, %s 
+                            WHERE EXISTS (SELECT 1 FROM Produto WHERE ASIN = %s)
+                            ON CONFLICT DO NOTHING
+                            """, (asin, similar, similar))    

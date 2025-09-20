@@ -48,16 +48,18 @@ if __name__ == "__main__":
     run_sql_file(conn, "/app/sql/schema.sql")
     
     # Verifica o esquema
-    print("\n=== Estrutura atual do banco ===")
-    print_schema(conn)
+    #print("\n=== Estrutura atual do banco ===")
+    #print_schema(conn)
 
     # Depois faz o ETL para inserir os dados
     filepath = Path("/app/data/snap_amazon.txt")
+    similares = dict()
     for product in utils.parse_products(filepath):
         if not product:
             continue  # Produto descontinuado, ignora
-
+        
         asin = product["asin"]
+        print(asin)
         title = product["title"]
         group_name = product["group"]
         salesrank = product["salesrank"]
@@ -69,10 +71,14 @@ if __name__ == "__main__":
         db.insert_product(conn, asin, title, group_name, salesrank, cat, rev, down, rating)
         #db.insert_similares(conn, asin, product["similar"])
         #print(product["categories"])
+        similares[asin] = product["similar"]
         for categoria in product["categories"]:
             db.insert_categoria(conn, asin, categoria)
         for review in product["reviews"]:
             db.insert_review(conn, asin, review)
-    # ...
     
+    for asin in similares.keys():
+        db.insert_similares(conn, asin, similares[asin])
+
+    conn.commit()
     conn.close()
