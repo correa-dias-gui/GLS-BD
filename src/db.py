@@ -49,7 +49,7 @@ def insert_similares(conn, asin, similares:list):
         with conn.cursor() as cur:
             for similar in similares:
                 cur.execute("""
-                            INSERT INTO Produto_similaridade(ASIN_c, ASIN_s)
+                            INSERT INTO Produto_similaridade(ASIN_p, ASIN_s)
                             SELECT %s, %s 
                             WHERE EXISTS (SELECT 1 FROM Produto WHERE ASIN = %s)
                             ON CONFLICT DO NOTHING

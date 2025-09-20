@@ -35,10 +35,10 @@ CREATE TABLE Produto_categoria (
 
 -- Produtos similares (N:N entre produtos)
 CREATE TABLE Produto_similaridade (
-    ASIN_c VARCHAR(20) REFERENCES Produto(ASIN) ON DELETE CASCADE,
+    ASIN_p VARCHAR(20) REFERENCES Produto(ASIN) ON DELETE CASCADE,
     ASIN_s VARCHAR(20) REFERENCES Produto(ASIN) ON DELETE CASCADE,
-    PRIMARY KEY (ASIN_c, ASIN_s),
-    CHECK (ASIN_c <> ASIN_s)
+    PRIMARY KEY (ASIN_p, ASIN_s),
+    CHECK (ASIN_p <> ASIN_s)
 );
 
 -- Avaliações (reviews)
