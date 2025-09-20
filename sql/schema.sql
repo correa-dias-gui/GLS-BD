@@ -4,7 +4,6 @@ DROP TABLE IF EXISTS Produto_categoria CASCADE;
 DROP TABLE IF EXISTS Categoria CASCADE;
 DROP TABLE IF EXISTS Produto_similaridade CASCADE;
 DROP TABLE IF EXISTS Produto CASCADE;
--- DROP TABLE IF EXISTS Cliente CASCADE;
 
 -- Produto
 CREATE TABLE Produto (
@@ -19,10 +18,6 @@ CREATE TABLE Produto (
     Avg_rating FLOAT
 );
 
--- Cliente
---CREATE TABLE customer (
---    customer_id VARCHAR(20) PRIMARY KEY
---);
 
 -- Categoria (hierarquia de categorias da Amazon)
 CREATE TABLE Categoria (
