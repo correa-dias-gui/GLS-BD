@@ -45,18 +45,19 @@ def parse_products(filepath):
             elif line.startswith("ASIN:"):
                 product["asin"] = line.split()[1]
 
-            elif line.startswith("  title:"):
+            elif line.startswith("title:"):
                 product["title"] = line.split(":", 1)[1].strip()
 
-            elif line.startswith("  group:"):
+            elif line.startswith("group:"):
                 product["group"] = line.split(":", 1)[1].strip()
 
-            elif line.startswith("  salesrank:"):
+            elif line.startswith("salesrank:"):
                 rank = line.split(":", 1)[1].strip()
                 product["salesrank"] = int(rank) if rank.isdigit() else None
 
-            elif line.startswith("  similar:"):
+            elif line.startswith("similar:"):
                 parts = line.split()
+                #print(f"Similar parts: {parts}")
                 product["similar"] = parts[2:]  # ignora o número inicial
 
             elif re.match(r"^\|", line):  # linha de categoria
@@ -73,7 +74,9 @@ def parse_products(filepath):
                     "helpful": int(parts[8])
                 }
                 product["reviews"].append(review)
-
+            elif "discontinued product" in line:
+                # Produto descontinuado, ignora
+                product = None
         # adiciona o último produto
         if product:
             yield product

@@ -6,15 +6,15 @@ from datetime import datetime
 def insert_product(conn, asin, title, group_name, salesrank, cat, rev, down, rating):
     with conn.cursor() as cur:
         cur.execute("""
-            INSERT INTO product (asin, title, group_name, salesrank, Qtd_categorias, Qtd_rev, Qtd_down, Avg_rating)
-            VALUES (%s, %s, %s, %s, %s, %s, %s,%s, %s)
+            INSERT INTO Produto (asin, title, group_name, salesrank, Qtd_cat, Qtd_rev, Qtd_down, Avg_rating)
+            VALUES (%s, %s, %s, %s, %s, %s, %s,%s)
             ON CONFLICT (asin) DO NOTHING
         """, (asin, title, group_name, salesrank, cat, rev, down, rating))
 
 def insert_review(conn, asin, review):
     with conn.cursor() as cur:
         cur.execute("""
-            INSERT INTO review (asin, customer_id, review_date, rating, votes, helpful)
+            INSERT INTO Review (asin, customer_id, review_date, rating, votes, helpful)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (
             asin,
@@ -25,25 +25,28 @@ def insert_review(conn, asin, review):
             review["helpful"]
         ))
 
-def insert_categoria(conn, asin, categorias:list[dict[str, str]]):
+def insert_categoria(conn, asin, categorias):
     comando = """
-            INSERT INTO Categoria (id, nome, id_pai)
+            INSERT INTO Categoria (Categoria_id, Nome, Pai_id)
             VALUES (%s, %s, %s)
+            ON CONFLICT (Categoria_id) DO UPDATE
+            SET Nome = EXCLUDED.Nome, Pai_id = EXCLUDED.Pai_id
             """
-    with conn.cursor as cur:
+    with conn.cursor() as cur:
         id_pai = None
         for categoria in categorias:
+            #print(categoria)
             cur.execute(comando, (categoria["id"], categoria["name"], id_pai))
             id_pai = categoria["id"]
 
         categoria = categorias[-1]
         cur.execute("""
-                    INSERT INTO Produto_categoria (ASIN, Categoria)
+                    INSERT INTO Produto_categoria (ASIN, Categoria_id)
                     VALUES (%s, %s)
                     """, (asin, categoria["id"]))
 
 def insert_similares(conn, asin, similares:list):
-        with conn.cursor as cur:
+        with conn.cursor() as cur:
             for similar in similares:
                 cur.execute("""
                             INSERT INTO Produto_similaridade(ASIN_c, ASIN_s)
