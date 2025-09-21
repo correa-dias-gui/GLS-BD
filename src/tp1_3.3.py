@@ -8,21 +8,23 @@ import pandas as pd
 # ==============================
 QUERIES = {
     "1": """
-    (
-      SELECT r.*
-      FROM Review r
-      WHERE r.ASIN = %(asin)s
-      ORDER BY r.Rating DESC, r.Helpful DESC
-      LIMIT 5
+    WITH top_reviews AS (
+        SELECT review_id, asin, customer_id, review_date, rating, votes, helpful
+        FROM Review
+        WHERE asin = %(asin)s
+        ORDER BY rating DESC, helpful DESC
+        LIMIT 5
+    ),
+    low_reviews AS (
+        SELECT review_id, asin, customer_id, review_date, rating, votes, helpful
+        FROM Review
+        WHERE asin = %(asin)s
+        ORDER BY rating ASC, helpful DESC
+        LIMIT 5
     )
-    UNION
-    (
-      SELECT r.*
-      FROM Review r
-      WHERE r.ASIN = %(asin)s
-      ORDER BY r.Rating ASC, r.Helpful DESC
-      LIMIT 5
-    );
+    SELECT * FROM top_reviews
+    UNION ALL
+    SELECT * FROM low_reviews;
     """,
 
     "2": """
@@ -36,11 +38,19 @@ QUERIES = {
     """,
 
     "3": """
-    SELECT r.Review_date, AVG(r.Rating) AS media_diaria
+    SELECT
+        r.review_date,
+        TRUNC(
+            AVG(r.rating) OVER (
+                ORDER BY r.review_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+            )::numeric,
+            2
+        ) AS media_acumulada
     FROM Review r
-    WHERE r.ASIN = %(asin)s
-    GROUP BY r.Review_date
-    ORDER BY r.Review_date;
+    WHERE r.asin = %(asin)s
+    GROUP BY r.review_date, r.rating
+    ORDER BY r.review_date;
     """,
 
     "4": """
@@ -65,36 +75,35 @@ QUERIES = {
     LIMIT 10;
     """,
 
-    # ✅ Consulta 6 atualizada com CTE recursiva para subir a hierarquia de categorias
     "6": """
-    WITH RECURSIVE cat_hierarchy AS (
-        -- ponto de partida: categorias mais profundas dos produtos
-        SELECT pc.ASIN, c.Id, c.Nome, c.Id_pai
-        FROM Produto_Categoria pc
-        JOIN Categoria c ON c.Id = pc.Id_cat
-
+    WITH RECURSIVE categoria_produto AS (
+        SELECT 
+            pc.asin,
+            pc.categoria_id
+        FROM Produto_categoria pc
         UNION ALL
-
-        -- sobe na hierarquia
-        SELECT ch.ASIN, c.Id, c.Nome, c.Id_pai
-        FROM cat_hierarchy ch
-        JOIN Categoria c ON c.Id = ch.Id_pai
+        SELECT 
+            cp.asin,
+            c.pai_id
+        FROM categoria_produto cp
+        JOIN Categoria c ON cp.categoria_id = c.categoria_id
+        WHERE c.pai_id IS NOT NULL
     ),
-
-    -- calcula a média de utilidade por produto
-    prod_media AS (
-        SELECT r.ASIN, AVG(CAST(r.Helpful AS FLOAT) / NULLIF(r.Votes, 0)) AS media_util
+    media_produto AS (
+        SELECT
+            r.asin,
+            AVG(r.helpful::numeric) AS media_util_positiva
         FROM Review r
-        WHERE r.Votes > 0
-        GROUP BY r.ASIN
+        WHERE r.rating > 3
+        GROUP BY r.asin
     )
-
-    -- associa cada produto às suas categorias (todas da hierarquia)
-    SELECT c.Id, c.Nome,
-           AVG(prod_media.media_util) AS media_categoria
-    FROM prod_media
-    JOIN cat_hierarchy c ON c.ASIN = prod_media.ASIN
-    GROUP BY c.Id, c.Nome
+    SELECT
+        c.nome AS categoria,
+        TRUNC(AVG(mp.media_util_positiva), 2) AS media_categoria
+    FROM categoria_produto cp
+    JOIN media_produto mp ON mp.asin = cp.asin
+    JOIN Categoria c ON c.categoria_id = cp.categoria_id
+    GROUP BY c.categoria_id, c.nome
     ORDER BY media_categoria DESC
     LIMIT 5;
     """,
