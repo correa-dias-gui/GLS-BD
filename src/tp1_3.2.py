@@ -52,7 +52,7 @@ if __name__ == "__main__":
     #print_schema(conn)
 
     # Depois faz o ETL para inserir os dados
-    filepath = Path("/app/data/snap_amazon.txt")
+    filepath = Path(args.input)
     similares = dict()
     for product in utils.parse_products(filepath):
         if not product:
@@ -78,6 +78,7 @@ if __name__ == "__main__":
             db.insert_review(conn, asin, review)
     
     for asin in similares.keys():
+        print(asin, similares[asin])
         db.insert_similares(conn, asin, similares[asin])
 
     conn.commit()

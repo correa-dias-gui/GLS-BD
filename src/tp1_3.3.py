@@ -138,7 +138,7 @@ def run_queries(conn, asin, output_path):
             print(df.to_string(index=False))
         
             # Salva em CSV
-            csv_path = f"{output_path}_query{key}.csv"
+            csv_path = f"{output_path}/result_query{key}.csv"
             df.to_csv(csv_path, index=False)
             print(f"Resultados salvos em: {csv_path}")
 
@@ -147,13 +147,13 @@ def run_queries(conn, asin, output_path):
 # ==============================
 def main():
     parser = argparse.ArgumentParser(description="Executa consultas SQL.")
-    parser.add_argument("--db-host", required=True)
-    parser.add_argument("--db-port", default=5432, type=int)
-    parser.add_argument("--db-user", required=True)
-    parser.add_argument("--db-pass", required=True)
-    parser.add_argument("--db-name", required=True)
-    parser.add_argument("--asin", required=True, help="ASIN do produto alvo")
-    parser.add_argument("--output", required=True, help="Caminho do arquivo de saída")
+    parser.add_argument("--db-host", default="db")
+    parser.add_argument("--db-port", type=int, default=5432)
+    parser.add_argument("--db-name", default="ecommerce")
+    parser.add_argument("--db-user", default="postgres")
+    parser.add_argument("--db-pass", default="postgres")
+    parser.add_argument("--asin",required=True, help="ASIN do produto alvo")
+    parser.add_argument("--output", default="/app/out",required=True, help="Caminho do arquivo de saída")
     args = parser.parse_args()
 
     try:
