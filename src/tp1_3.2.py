@@ -1,4 +1,4 @@
-import psycopg
+import psycopg2
 from pathlib import Path
 import db
 import utils
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser.add_argument("--input", required=True, help="Caminho para o arquivo SNAP")
     args = parser.parse_args()
 
-    conn = psycopg.connect(
+    conn = psycopg2.connect(
         host=args.db_host, port=args.db_port, dbname=args.db_name,
         user=args.db_user, password=args.db_pass
     )
@@ -53,33 +53,33 @@ if __name__ == "__main__":
 
     # Depois faz o ETL para inserir os dados
     filepath = Path(args.input)
-    similares = dict()
-    for product in utils.parse_products(filepath):
-        if not product:
-            continue  # Produto descontinuado, ignora
+    # similares = dict()
+    # for product in utils.parse_products(filepath):
+    #     if not product:
+    #         continue  # Produto descontinuado, ignora
         
-        asin = product["asin"]
-        print(asin)
-        title = product["title"]
-        group_name = product["group"]
-        salesrank = product["salesrank"]
-        cat = len(product["categories"])
-        rev = len(product["reviews"])
-        down = sum(1 for r in product["reviews"] if r["rating"] <= 2)
-        rating = (sum(r["rating"] for r in product["reviews"]) / rev) if rev > 0 else None
-        #print(asin, title, group_name, product["similar"],salesrank, cat, rev, down, rating)
-        db.insert_product(conn, asin, title, group_name, salesrank, cat, rev, down, rating)
-        #db.insert_similares(conn, asin, product["similar"])
-        #print(product["categories"])
-        similares[asin] = product["similar"]
-        for categoria in product["categories"]:
-            db.insert_categoria(conn, asin, categoria)
-        for review in product["reviews"]:
-            db.insert_review(conn, asin, review)
+    #     asin = product["asin"]
+    #     print(asin)
+    #     title = product["title"]
+    #     group_name = product["group"]
+    #     salesrank = product["salesrank"]
+    #     cat = len(product["categories"])
+    #     rev = len(product["reviews"])
+    #     down = sum(1 for r in product["reviews"] if r["rating"] <= 2)
+    #     rating = (sum(r["rating"] for r in product["reviews"]) / rev) if rev > 0 else None
+    #     #print(asin, title, group_name, product["similar"],salesrank, cat, rev, down, rating)
+    #     db.insert_product(conn, asin, title, group_name, salesrank, cat, rev, down, rating)
+    #     #db.insert_similares(conn, asin, product["similar"])
+    #     #print(product["categories"])
+    #     similares[asin] = product["similar"]
+    #     for categoria in product["categories"]:
+    #         db.insert_categoria(conn, asin, categoria)
+    #     for review in product["reviews"]:
+    #         db.insert_review(conn, asin, review)
     
-    for asin in similares.keys():
-        print(asin, similares[asin])
-        db.insert_similares(conn, asin, similares[asin])
+    # for asin in similares.keys():
+    #     print(asin, similares[asin])
+    #     db.insert_similares(conn, asin, similares[asin])
 
     conn.commit()
     conn.close()

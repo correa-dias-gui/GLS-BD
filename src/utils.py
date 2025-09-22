@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 def parse_category_line(line):
     """
@@ -81,3 +82,45 @@ def parse_products(filepath):
         if product:
             yield product
 
+def parse_1000_products(filepath):
+    """
+    Gera os primeiros 1000 produtos do arquivo SNAP.
+    """
+    products = []
+    reviews = []
+    similares = []
+    categorias = []
+    for i, product in enumerate(parse_products(filepath), start=1):
+        if i % 1000:
+            yield (products, categorias, reviews, similares)
+            products = []
+            reviews = []
+            similares = []
+
+        rev = len(product["reviews"])
+        products.append((
+            product["asin"], product["title"], product["group"], product["salesrank"],
+            len(product["categories"]),
+            rev,
+            sum(1 for r in product["reviews"] if r["rating"] <= 2),
+            (sum(r["rating"] for r in product["reviews"]) / rev) if rev > 0 else None
+        ))
+
+        for review in product["reviews"]:
+            reviews.append((
+                product["asin"],
+                review["customer"], 
+                datetime.strptime(review["date"], "%Y-%m-%d"), 
+                review["rating"], review["votes"], review["helpful"]
+            ))
+
+        for sim in product["similar"]:
+            similares.append((product["asin"], sim))    
+        
+        id_pai = None
+        for categoria in product["categories"]:
+            categorias.append((id_pai, categoria["name"], categoria["id"]))
+            id_pai = categoria["id"]
+        
+    if products or reviews or similares or categorias:
+        yield (products, categorias, reviews, similares)    
