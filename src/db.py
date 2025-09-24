@@ -1,4 +1,4 @@
-from psycopg.extras import execute_batch
+from psycopg2.extras import execute_batch
 from datetime import datetime
 
 
@@ -62,14 +62,14 @@ def insert_product_batch(conn, products):
             INSERT INTO Produto (asin, title, group_name, salesrank, Qtd_cat, Qtd_rev, Qtd_down, Avg_rating)
             VALUES (%s, %s, %s, %s, %s, %s, %s,%s)
             ON CONFLICT (asin) DO NOTHING
-    """, products, page_size=1000)
+    """, products, page_size=len(products))
 
 def insert_review_batch(conn, reviews):
     with conn.cursor() as cur:
         execute_batch(cur, """
             INSERT INTO Review (asin, customer_id, review_date, rating, votes, helpful)
             VALUES (%s, %s, %s, %s, %s, %s)
-    """, reviews, page_size=1000)
+    """, reviews, page_size=len(reviews))
 
 def insert_categoria_batch(conn, categories_list):
     """Inserir uma lista de categorias na tabela Categoria.
@@ -79,13 +79,9 @@ def insert_categoria_batch(conn, categories_list):
         execute_batch(cur, """
             INSERT INTO Categoria (Categoria_id, Nome, Pai_id)
             VALUES (%s, %s, %s)
-            ON CONFLICT (Categoria_id) DO UPDATE
-            SET Nome = EXCLUDED.Nome, Pai_id = EXCLUDED.Pai_id
-        """, categories_list, page_size=1000)
+            ON CONFLICT (Categoria_id) DO NOTHING
+        """, categories_list, page_size=len(categories_list))
 
-def insert_categories_batch_corrigida(conn, categories_list):
-    """Alias compatível: insere categorias no formato (Categoria_id, Nome, Pai_id)."""
-    return insert_categoria_batch(conn, categories_list)
 
 def insert_produto_categoria_batch(conn, produto_categoria_list):
     """Insere relações Produto_categoria em lote.
@@ -100,24 +96,6 @@ def insert_produto_categoria_batch(conn, produto_categoria_list):
             ON CONFLICT (ASIN, Categoria_id) DO NOTHING
         """, produto_categoria_list, page_size=1000)
 
-# def insert_categoria_batch(conn, asin, categorias):
-#     comando = """
-#             INSERT INTO Categoria (Categoria_id, Nome, Pai_id)
-#             VALUES (%s, %s, %s)
-#             ON CONFLICT (Categoria_id) DO UPDATE
-#             SET Nome = EXCLUDED.Nome, Pai_id = EXCLUDED.Pai_id
-#             """
-#     with conn.cursor() as cur:
-#         id_pai = None
-#         categorias_list = [] # execute_batch precisa de lista
-    
-#         execute_batch(cur, comando, categorias_list, pagesize=len(categorias_list))
-
-#         categoria = categorias[-1]
-#         cur.execute("""
-#                     INSERT INTO Produto_categoria (ASIN, Categoria_id)
-#                     VALUES (%s, %s)
-#                     """, (asin, categoria["id"]))
 
 def insert_similares_batch(conn, asin, similares:list):
         # Versão antiga (por produto) mantida por compatibilidade; converte em lista de tuplas
@@ -141,4 +119,4 @@ def insert_similares_batch_corrigida(conn, similares_list:list[tuple[str, str]])
                 SELECT %s, %s 
                 WHERE EXISTS (SELECT 1 FROM Produto WHERE ASIN = %s)
                 ON CONFLICT DO NOTHING
-            """, args, page_size=1000)
+            """, args, page_size=len(similares_list))

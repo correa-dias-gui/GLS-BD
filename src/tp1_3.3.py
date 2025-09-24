@@ -1,6 +1,6 @@
 import argparse
 import sys
-import psycopg
+import psycopg2
 import pandas as pd
 
 # ==============================
@@ -157,7 +157,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        conn = psycopg.connect(
+        conn = psycopg2.connect(
             host=args.db_host,
             port=args.db_port,
             user=args.db_user,

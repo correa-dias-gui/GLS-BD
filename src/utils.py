@@ -83,19 +83,21 @@ def parse_products(filepath):
             yield product
 
 def parse_1000_products(filepath):
-    """
-    Gera os primeiros 1000 produtos do arquivo SNAP.
-    """
+    
     products = []
     reviews = []
     similares = []
+    categorias_hierarquia = []
     categorias = []
     for i, product in enumerate(parse_products(filepath), start=1):
-        if i % 1000:
-            yield (products, categorias, reviews, similares)
+        if i % 10000 == 0:
+            print("devolveu 10000 produtos")
+            yield (products, categorias_hierarquia, categorias, reviews, similares)
             products = []
             reviews = []
             similares = []
+            categorias_hierarquia = []
+            categorias =[]
 
         rev = len(product["reviews"])
         products.append((
@@ -118,9 +120,13 @@ def parse_1000_products(filepath):
             similares.append((product["asin"], sim))    
         
         id_pai = None
-        for categoria in product["categories"]:
-            categorias.append((id_pai, categoria["name"], categoria["id"]))
-            id_pai = categoria["id"]
-        
-    if products or reviews or similares or categorias:
-        yield (products, categorias, reviews, similares)    
+        for hierarquia in product["categories"]:
+            for categoria in hierarquia:
+
+                categorias_hierarquia.append((categoria["id"], categoria["name"], id_pai))
+                id_pai = categoria["id"]
+
+            categorias.append((product["asin"], hierarquia[-1]["id"]))
+
+    if products or reviews or similares or categorias_hierarquia or categorias:
+        yield (products, categorias_hierarquia, categorias, reviews, similares)    
