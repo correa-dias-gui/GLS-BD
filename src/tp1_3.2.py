@@ -114,7 +114,7 @@ for products, categorias_hierarquia, categorias, reviews, similares in utils.par
         print("Inserindo categorias final")
         db.insert_produto_categoria_batch(conn, categorias)
 
-    print("Inserindo similares")
+    print("acumulando produtos similares para inserir depois...")
     similares_batch.extend(similares)
     
  # Inserir produtos similares (após todos os produtos existirem)

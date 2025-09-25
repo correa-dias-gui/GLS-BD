@@ -1,3 +1,5 @@
+# **GLS-BD:**
+
 # 1) Construir e subir os serviços
 ```bash
 docker compose up -d --build
@@ -13,8 +15,9 @@ docker compose run --rm app python src/tp1_3.2.py \
   --input /data/snap_amazon.txt
 ```
 # 4) Executar o Dashboard (todas as consultas)
+- A flag `--asin` é obrigatória e todas as consultas serao referentes ao produto deste asin.
 ```bash
 docker compose run --rm app python src/tp1_3.3.py \
   --db-host db --db-port 5432 --db-name ecommerce --db-user postgres --db-pass postgres \
-  --output /app/out
+  --asin 0738700797 --output /app/out
   ```

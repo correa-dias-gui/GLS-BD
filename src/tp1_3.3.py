@@ -153,7 +153,7 @@ def main():
     parser.add_argument("--db-user", default="postgres")
     parser.add_argument("--db-pass", default="postgres")
     parser.add_argument("--asin",required=True, help="ASIN do produto alvo")
-    parser.add_argument("--output", default="/app/out",required=True, help="Caminho do arquivo de saída")
+    parser.add_argument("--output", default="/app/out", help="Caminho do arquivo de saída")
     args = parser.parse_args()
 
     try:
@@ -171,5 +171,5 @@ def main():
         print(f"Erro: {e}", file=sys.stderr)
         sys.exit(1)
 
-
+# 0738700797
 main()
