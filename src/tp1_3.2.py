@@ -48,48 +48,10 @@ if __name__ == "__main__":
     # Executa o esquema
     run_sql_file(conn, "/app/sql/schema.sql")
     
-    # Verifica o esquema
-    #print("\n=== Estrutura atual do banco ===")
-    #print_schema(conn)
-
-    # Depois faz o ETL para inserir os dados
-
-    # similares = dict()
-    # for product in utils.parse_products(filepath):
-    #     if not product:
-    #         continue  # Produto descontinuado, ignora
-        
-    #     asin = product["asin"]
-    #     print(asin)
-    #     title = product["title"]
-    #     group_name = product["group"]
-    #     salesrank = product["salesrank"]
-    #     cat = len(product["categories"])
-    #     rev = len(product["reviews"])
-    #     down = sum(1 for r in product["reviews"] if r["rating"] <= 2)
-    #     rating = (sum(r["rating"] for r in product["reviews"]) / rev) if rev > 0 else None
-    #     #print(asin, title, group_name, product["similar"],salesrank, cat, rev, down, rating)
-    #     db.insert_product(conn, asin, title, group_name, salesrank, cat, rev, down, rating)
-    #     #db.insert_similares(conn, asin, product["similar"])
-    #     #print(product["categories"])
-    #     similares[asin] = product["similar"]
-    #     for categoria in product["categories"]:
-    #         db.insert_categoria(conn, asin, categoria)
-    #     for review in product["reviews"]:
-    #         db.insert_review(conn, asin, review)
-    
-    # for asin in similares.keys():
-    #     print(asin, similares[asin])
-    #     db.insert_similares(conn, asin, similares[asin])
 
 
 filepath = Path(args.input)
-BATCH_SIZE = 1000  # Inserir a cada 1000 produtos
 
-# products_batch = []
-# reviews_batch = []
-# categories_batch = []  # Para tabela Categoria
-# produto_categoria_batch = []  # Para tabela Produto_categoria
 similares_batch = []
 print("Iniciando ETL em modo batch...")
 processed_count = 0
@@ -120,7 +82,7 @@ for products, categorias_hierarquia, categorias, reviews, similares in utils.par
  # Inserir produtos similares (após todos os produtos existirem)
 print("Inserindo produtos similares...")
 if similares_batch:
-    db.insert_similares_batch_corrigida(conn, similares_batch)
+    db.insert_similares_batch(conn, similares_batch)
 
 print(f"ETL finalizado. Total de produtos processados: {processed_count}")
 

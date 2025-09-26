@@ -1,4 +1,4 @@
--- Limpeza inicial (para evitar conflitos se rodar mais de uma vez)
+    -- Limpeza inicial (para evitar conflitos se rodar mais de uma vez)
 DROP TABLE IF EXISTS Review CASCADE;
 DROP TABLE IF EXISTS Produto_categoria CASCADE;
 DROP TABLE IF EXISTS Categoria CASCADE;

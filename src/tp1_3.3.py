@@ -152,7 +152,7 @@ def main():
     parser.add_argument("--db-name", default="ecommerce")
     parser.add_argument("--db-user", default="postgres")
     parser.add_argument("--db-pass", default="postgres")
-    parser.add_argument("--asin",required=True, help="ASIN do produto alvo")
+    parser.add_argument("--asin",default="0738700797", help="ASIN do produto alvo")
     parser.add_argument("--output", default="/app/out", help="Caminho do arquivo de saída")
     args = parser.parse_args()
 
